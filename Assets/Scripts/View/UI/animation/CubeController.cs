@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,6 +10,8 @@ namespace View.UI.animation
     {
 
         public Animator anim;
+        public bool open = false;
+
         // Start is called before the first frame update
         private void Start()
         {
@@ -22,7 +25,21 @@ namespace View.UI.animation
             {
                 anim.Play("Cube");
             }
+            else if (Input.GetKeyDown("space"))
+            {
+                if (open)
+                {
+                    anim.SetTrigger("Close");
+                    open = !open;
+                }
+                else
+                {
+                    anim.SetTrigger("Open");
+                    open = !open;
+                }
 
+
+            }
         }
     }
 

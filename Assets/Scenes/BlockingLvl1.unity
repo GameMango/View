@@ -4177,6 +4177,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   anim: {fileID: 0}
+  change: 2
 --- !u!1 &1339665251 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -4758926477541936347, guid: ef5d12353835af74d947dec4933b894e,
@@ -4393,6 +4394,16 @@ PrefabInstance:
       propertyPath: grabbedObject
       value: 
       objectReference: {fileID: 2080891862}
+    - target: {fileID: 2108836170560617299, guid: e9fbd638fbe692849b675ceb36daa330,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2108836170560617300, guid: e9fbd638fbe692849b675ceb36daa330,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e9fbd638fbe692849b675ceb36daa330, type: 3}
 --- !u!20 &1396997759 stripped
