@@ -4,15 +4,14 @@ namespace View.Character.Tool
 {
     public class ToolController : MonoBehaviour
     {
+        public VRCharacterController vrCharacterController;
+        
         public GameObject grabbedObject;
         private Rigidbody _grabbedRigidbody;
         private float _origDrag;
         private float _origMass;
 
-        public OVRInput.Controller primaryController;
-        public OVRInput.Controller secondaryController;
-        public Camera centerEye;
-        public Transform trackingSpace;
+       
         public LineRenderer lineRendererTranslate;
         public float maxGrabDistance = 10;
         public float stickSensitivity = 0.1f;
@@ -34,25 +33,13 @@ namespace View.Character.Tool
         private float _grabDistance;
 
         private float _rotateZLast;
-        
+
+        public bool Rotating => _triggeredRotate;
+        public bool Grabbing => _grabbing;
+
         private void FixedUpdate()
         {
-            if (!_triggeredRotate)
-            {
-                Vector2 stickInput = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, secondaryController);
-                Vector3 dir = new Vector3(stickInput.x, 0, stickInput.y);
-                dir = Quaternion.Euler(0, centerEye.transform.rotation.eulerAngles.y, 0) * dir;
-                var forward = centerEye.transform.forward;
-                trackingSpace.position += dir;
-            }
-
-            float turn = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, primaryController).x;
-            if (Mathf.Abs(turn) >= 0.1)
-            {
-                trackingSpace.RotateAround(trackingSpace.position, Vector3.up, turn);
-            }
-            
-            if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, primaryController) >= triggerThreshold)
+            if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, vrCharacterController.primaryController) >= triggerThreshold)
             {
                 if (_triggeredGrab) return;
                 if (_grabbing)
@@ -68,9 +55,9 @@ namespace View.Character.Tool
                 }
                 else
                 {
-                    Vector3 pos = trackingSpace.TransformPoint(OVRInput.GetLocalControllerPosition(primaryController));
+                    Vector3 pos = vrCharacterController.trackingSpace.TransformPoint(OVRInput.GetLocalControllerPosition(vrCharacterController.primaryController));
                     Vector3 rotEuler =
-                        trackingSpace.TransformDirection(OVRInput.GetLocalControllerRotation(primaryController).eulerAngles);
+                        vrCharacterController.trackingSpace.TransformDirection(OVRInput.GetLocalControllerRotation(vrCharacterController.primaryController).eulerAngles);
                     Quaternion rot = Quaternion.Euler(rotEuler);
                     Ray ray = new Ray(pos, rot * Vector3.forward);
                     if (Physics.Raycast(ray, out var hit, maxGrabDistance))
@@ -98,7 +85,7 @@ namespace View.Character.Tool
                 _triggeredGrab = false;
             }
             
-            if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, secondaryController) >= triggerThreshold)
+            if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, vrCharacterController.secondaryController) >= triggerThreshold)
             {
                 if (_triggeredRotate) return;
                 if (!_grabbing) return;
@@ -119,16 +106,16 @@ namespace View.Character.Tool
         {
             if (_grabbing)
             {
-                Vector2 distance = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, primaryController);
+                Vector2 distance = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, vrCharacterController.primaryController);
                 _grabDistance = Mathf.Min(Mathf.Max(minGrabDistance, _grabDistance + distance.y * stickSensitivity),
                     maxGrabDistance);
 
-                Vector3 pos = trackingSpace.TransformPoint(OVRInput.GetLocalControllerPosition(primaryController));
+                Vector3 pos = vrCharacterController.trackingSpace.TransformPoint(OVRInput.GetLocalControllerPosition(vrCharacterController.primaryController));
                 lineRendererTranslate.SetPosition(0, transform.position);
                 lineRendererTranslate.SetPosition(1, grabbedObject.transform.position);
 
                 Vector3 rotEuler =
-                    trackingSpace.TransformDirection(OVRInput.GetLocalControllerRotation(primaryController).eulerAngles);
+                    vrCharacterController.trackingSpace.TransformDirection(OVRInput.GetLocalControllerRotation(vrCharacterController.primaryController).eulerAngles);
                 Quaternion rot = Quaternion.Euler(rotEuler);
                 _grabbedRigidbody.AddForce(
                     (pos + rot * Vector3.forward * _grabDistance - grabbedObject.transform.position) * forceMult);
@@ -139,28 +126,28 @@ namespace View.Character.Tool
                 {
                     if (_startRotate)
                     {
-                        _rotateZLast = OVRInput.GetLocalControllerRotation(secondaryController).eulerAngles.z;
+                        _rotateZLast = OVRInput.GetLocalControllerRotation(vrCharacterController.secondaryController).eulerAngles.z;
                         _startRotate = false;
                     }
                     
-                    Vector3 rotSecond = OVRInput.GetLocalControllerRotation(secondaryController).eulerAngles;
-                    Vector2 stickInput = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, secondaryController);
+                    Vector3 rotSecond = OVRInput.GetLocalControllerRotation(vrCharacterController.secondaryController).eulerAngles;
+                    Vector2 stickInput = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, vrCharacterController.secondaryController);
 
                     var grabPos = grabbedObject.transform.position;
-                    grabbedObject.transform.RotateAround(grabPos, centerEye.transform.forward, (rotSecond.z - _rotateZLast) * rotationHandSensitivity);
+                    grabbedObject.transform.RotateAround(grabPos, vrCharacterController.centerEye.transform.forward, (rotSecond.z - _rotateZLast) * rotationHandSensitivity);
 
                     _rotateZLast = rotSecond.z;
                     
-                    grabbedObject.transform.RotateAround(grabPos, centerEye.transform.up, stickInput.x * rotationStickSensitivity);
-                    grabbedObject.transform.RotateAround(grabPos, centerEye.transform.right, stickInput.y * rotationStickSensitivity);
+                    grabbedObject.transform.RotateAround(grabPos, vrCharacterController.centerEye.transform.up, stickInput.x * rotationStickSensitivity);
+                    grabbedObject.transform.RotateAround(grabPos, vrCharacterController.centerEye.transform.right, stickInput.y * rotationStickSensitivity);
                 }
             }
-            else if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, primaryController) >= previewThreshold)
+            else if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, vrCharacterController.primaryController) >= previewThreshold)
             {
                 lineRendererTranslate.enabled = true;
-                Vector3 pos = trackingSpace.TransformPoint(OVRInput.GetLocalControllerPosition(primaryController));
+                Vector3 pos = vrCharacterController.trackingSpace.TransformPoint(OVRInput.GetLocalControllerPosition(vrCharacterController.primaryController));
                 Vector3 rotEuler =
-                    trackingSpace.TransformDirection(OVRInput.GetLocalControllerRotation(primaryController).eulerAngles);
+                    vrCharacterController.trackingSpace.TransformDirection(OVRInput.GetLocalControllerRotation(vrCharacterController.primaryController).eulerAngles);
                 Quaternion rot = Quaternion.Euler(rotEuler);
                 lineRendererTranslate.SetPosition(0, pos);
                 lineRendererTranslate.SetPosition(1, pos + rot * Vector3.forward * maxGrabDistance);

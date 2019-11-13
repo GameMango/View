@@ -132,6 +132,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: VRCharacter
       objectReference: {fileID: 0}
+    - target: {fileID: 8616804311682845878, guid: e9fbd638fbe692849b675ceb36daa330,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8616804311683207318, guid: e9fbd638fbe692849b675ceb36daa330,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -186,6 +191,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8616804311672125778, guid: e9fbd638fbe692849b675ceb36daa330,
+        type: 3}
+      propertyPath: useIPDInPositionTracking
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e9fbd638fbe692849b675ceb36daa330, type: 3}
