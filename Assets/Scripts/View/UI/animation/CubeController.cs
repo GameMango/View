@@ -14,7 +14,7 @@ namespace View.UI.animation
         private bool _open = false;
 
         // Start is called before the first frame update
-        private void Start()
+        private void Awake()
         {
             _anim = GetComponent<Animator>();
         }

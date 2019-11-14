@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using View.UI.animation;
 
 namespace View.Character.Tool
 {
@@ -10,7 +11,7 @@ namespace View.Character.Tool
         public GameObject model;
         public GameObject menuCube;
         public GameObject hand;
-        public Animator anim;
+        public CubeController controller;
 
         void OnCollisionEnter(UnityEngine.Collision col){
             if (col.gameObject.name == "RubiksCube")
@@ -19,7 +20,8 @@ namespace View.Character.Tool
                 Destroy(col.gameObject);
                 menuCube.SetActive(true);
                 hand.SetActive(false);
-                anim.SetTrigger("Open");
+                controller.SwitchMenu();
+                
             }
         }
     
