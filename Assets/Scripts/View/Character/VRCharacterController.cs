@@ -11,6 +11,7 @@ namespace View.Character
         public OVRInput.Controller secondaryController;
         public Camera centerEye;
         public Transform trackingSpace;
+        
         private void FixedUpdate()
         {
            

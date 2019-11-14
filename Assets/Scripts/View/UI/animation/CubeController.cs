@@ -9,13 +9,13 @@ namespace View.UI.animation
     public class CubeController : MonoBehaviour
     {
 
-        public Animator anim;
-        public bool open = false;
+        private Animator _anim;
+        private bool _open = false;
 
         // Start is called before the first frame update
         private void Start()
         {
-            anim = GetComponent<Animator>();
+            _anim = GetComponent<Animator>();
         }
 
         // Update is called once per frame
@@ -23,19 +23,28 @@ namespace View.UI.animation
         {
             if (OVRInput.GetDown(OVRInput.Button.One))
             {
-                anim.Play("Cube");
-            }
-            else if (Input.GetKeyDown("space"))
-            {
-                if (open)
+                if (_open)
                 {
-                    anim.SetTrigger("Close");
-                    open = !open;
+                    _anim.SetTrigger("Close");
+                    _open = !_open;
                 }
                 else
                 {
-                    anim.SetTrigger("Open");
-                    open = !open;
+                    _anim.SetTrigger("Open");
+                    _open = !_open;
+                }
+            }
+            else if (Input.GetKeyDown("space"))
+            {
+                if (_open)
+                {
+                    _anim.SetTrigger("Close");
+                    _open = !_open;
+                }
+                else
+                {
+                    _anim.SetTrigger("Open");
+                    _open = !_open;
                 }
 
 
