@@ -12,7 +12,7 @@ namespace View.Character.Player
         public static void SavePlayer(OurPlayer player)
         {
             BinaryFormatter formatter = new BinaryFormatter();
-            string path = Application.persistentDataPath + "/ourPlayer.gonia";
+            string path = Application.persistentDataPath + "/ourPlayer.view";
             
             FileStream stream = new FileStream(path, FileMode.Create);
             OurPlayerData data = new OurPlayerData(player);
@@ -24,7 +24,7 @@ namespace View.Character.Player
 
         public static OurPlayerData LoadPlayer()
         {
-            string path = Application.persistentDataPath + "/ourPlayer.gonia";
+            string path = Application.persistentDataPath + "/ourPlayer.view";
             if (File.Exists(path))
             {
                 BinaryFormatter formatter = new BinaryFormatter();
