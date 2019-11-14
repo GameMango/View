@@ -2039,6 +2039,7 @@ MonoBehaviour:
   model: {fileID: 2006238484}
   menuCube: {fileID: 1396997760}
   hand: {fileID: 1396997758}
+  anim: {fileID: 1396997763}
 --- !u!54 &1396997762
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2055,6 +2056,12 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!95 &1396997763 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 8309243547224433802, guid: e9fbd638fbe692849b675ceb36daa330,
+    type: 3}
+  m_PrefabInstance: {fileID: 1396997757}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1436694805 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -753543857306860046, guid: 1ad7d6a6217849446afca4e2f512394b,

@@ -22,12 +22,6 @@ namespace View.UI.animation
         // Update is called once per frame
         private void FixedUpdate()
         {
-
-            if (Collision._isCollision)
-            {
-                _anim.SetTrigger("Close");
-            }
-            
             if (OVRInput.GetDown(OVRInput.Button.One))
             {
                 if (_open)
