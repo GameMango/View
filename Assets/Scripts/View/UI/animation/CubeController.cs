@@ -22,33 +22,23 @@ namespace View.UI.animation
         // Update is called once per frame
         private void FixedUpdate()
         {
-            if (OVRInput.GetDown(OVRInput.Button.One))
+            if (Input.GetKeyDown(KeyCode.Space))
             {
-                if (_open)
-                {
-                    _anim.SetTrigger("Close");
-                    _open = !_open;
-                }
-                else
-                {
-                    _anim.SetTrigger("Open");
-                    _open = !_open;
-                }
+               SwitchMenu();
             }
-            else if (Input.GetKeyDown("space"))
+        }
+
+        public void SwitchMenu()
+        {
+            if (_open)
             {
-                if (_open)
-                {
-                    _anim.SetTrigger("Close");
-                    _open = !_open;
-                }
-                else
-                {
-                    _anim.SetTrigger("Open");
-                    _open = !_open;
-                }
-
-
+                _anim.SetTrigger("Close");
+                _open = !_open;
+            }
+            else
+            {
+                _anim.SetTrigger("Open");
+                _open = !_open;
             }
         }
     }
