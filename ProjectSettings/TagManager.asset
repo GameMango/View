@@ -17,6 +17,8 @@ TagManager:
   - Grabbable
   - Player
   - Hands
+  - Tool
+  - Red
   - 
   - 
   - 
