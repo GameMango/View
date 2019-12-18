@@ -1,38 +1,60 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 namespace View.Perspective
 {
     public class PerspectiveCheck : MonoBehaviour
     {
         [Serializable]
-        public struct ToCheckTransform
+        public class ColliderRay
         {
-            public Transform checkAgainst;
-            public Transform toCheck;
+            public Transform target;
+            public Collider toHit;
         }
 
-        public ToCheckTransform[] checks;
+        public Transform cameraTransform;
+        public Transform targetCameraTransform;
+        public ColliderRay[] toCheck = new ColliderRay[0];
+
         public float positionCheckTolerance = 1;
         public float directionCheckTolerance = 1;
-        public UnityEvent onCheckSucceeded;
+        public UnityEvent checkSucceeded;
 
         private bool _checkSucceeded;
+        private int _perspectiveLayerMask;
+
+        private void Start()
+        {
+            _perspectiveLayerMask = LayerMask.GetMask("Perspective");
+        }
 
         private void Update()
         {
             if (_checkSucceeded) return;
-            foreach (var checkTransforms in checks)
+
+            Vector3 camPos = cameraTransform.transform.position;
+            foreach (var colliderRay in toCheck)
             {
-                if (Vector3.Distance(checkTransforms.checkAgainst.position, checkTransforms.toCheck.position) >
-                    positionCheckTolerance) return;
-                if (Vector3.Distance(checkTransforms.checkAgainst.forward, checkTransforms.toCheck.forward) >
-                    directionCheckTolerance) return;
+                Debug.DrawLine(camPos, colliderRay.target.position, Color.red, 0.1f);
+            }
+
+//            if (Vector3.Distance(cameraTransform.position, targetCameraTransform.position) >
+//                positionCheckTolerance) return;
+//            if (Quaternion.Angle(cameraTransform.rotation, targetCameraTransform.rotation) >
+//                directionCheckTolerance) return;
+
+
+            foreach (var colliderRay in toCheck)
+            {
+                var ray = new Ray(camPos, colliderRay.target.position - camPos);
+                if (!Physics.Raycast(ray, out var hit, _perspectiveLayerMask)) return;
+                if (hit.collider.GetInstanceID() != colliderRay.toHit.GetInstanceID()) return;
             }
 
             _checkSucceeded = true;
-            onCheckSucceeded.Invoke();
+            checkSucceeded.Invoke();
         }
     }
 }

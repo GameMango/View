@@ -33,10 +33,5 @@ namespace View.Perspective
                 trigger.animator.SetTrigger(trigger.trigger);
             }
         }
-
-        private void FixedUpdate()
-        {
-            GetComponent<Rigidbody>().velocity = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
-        }
     }
 }
