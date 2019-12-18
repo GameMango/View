@@ -34,14 +34,6 @@ namespace View.ColorShader
             }
         }
 
-        private void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.F))
-            {
-                CycleEnable();
-            }
-        }
-
         public void CycleEnable()
         {
             enable = enable == 3 ? 0 : enable + 1;
