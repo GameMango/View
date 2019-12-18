@@ -38,8 +38,10 @@ namespace View.Character
         public void Move(Vector3 dir)
         {
             if (leftGrabHandler.FloatGrabbing) return;
-            if (!teleporting)
-                _rigidbody.AddForce(dir * speed, ForceMode.VelocityChange);
+            if (teleporting) return;
+            dir.y = 0;
+            dir = dir.normalized;
+            _rigidbody.AddForce(dir * speed, ForceMode.VelocityChange);
         }
 
         public void ShowCurvedPointer(bool val)

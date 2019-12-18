@@ -18,6 +18,7 @@ namespace View.Character
 
         public InteractorFacade interactor;
         public Transform follow;
+        public bool grabWhenClose = true;
 
         public float distanceSensitivity = 0.1f;
         public float floatDrag = 8;
@@ -48,7 +49,7 @@ namespace View.Character
         {
             if (!_floatGrabbing) return;
             float currentDistance = Vector3.Distance(follow.transform.position, _grabbedObject.transform.position);
-            if (currentDistance <= grabDistanceBounds.minimum)
+            if (grabWhenClose && currentDistance <= grabDistanceBounds.minimum)
             {
                 InteractableFacade interactable = _grabbedObject.gameObject.GetComponent<InteractableFacade>();
                 if (interactable != null && interactor != null)
