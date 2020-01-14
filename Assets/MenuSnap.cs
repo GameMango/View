@@ -8,18 +8,12 @@ public class MenuSnap : MonoBehaviour
 {
     
     public UnityEvent triggered = new UnityEvent();
-    public GameObject letter;
     public GameObject placeholderStart;
-    public Vector3 letterTransformation;
-    public Quaternion letterRotation;
     public Quaternion startRotation;
     public Vector3 startTransformation;
     
     private void Start()
     {
-        letter = GameObject.Find("LetterT");
-        placeholderStart = GameObject.Find("Placeholder_Start");
-        letterTransformation = transform.position;
         startTransformation = placeholderStart.transform.position;
         startRotation = placeholderStart.transform.rotation;
     }
@@ -32,10 +26,9 @@ public class MenuSnap : MonoBehaviour
             //If the GameObject's name matches the one you suggest, output this message in the console
             Debug.Log("Start Menu");
             //letter = collider.gameObject;
-            transform.position = startTransformation;
-            transform.rotation = startRotation;
-            //letter.transform.rotation = Quaternion.Euler(new Vector3(90,0,0));
-            //transform.rotation = Quaternion.Euler(90, 0, 0);
+            collider.transform.position = startTransformation;
+            collider.transform.rotation = startRotation;
+            collider.attachedRigidbody.useGravity = false;
             triggered.Invoke();
         }
     }
