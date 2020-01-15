@@ -3,7 +3,42 @@ guid: 1fbc15af095b8a849801ae6171988a73
 ModelImporter:
   serializedVersion: 26
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: BaseGrey
+    second: {fileID: 2100000, guid: 7afde544a46321e4aadeaa098300b1dd, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Blue
+    second: {fileID: 2100000, guid: 147bfd3e498f2e34682b2c8d45f0b7c3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Green
+    second: {fileID: 2100000, guid: e4aca9a6bcd32e24d83bc9e7c632d8c2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Orange
+    second: {fileID: 2100000, guid: 9042743ac7ee9b94fb0a25d3d4f76aac, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: RoadSurface
+    second: {fileID: 2100000, guid: c448008f36f2b344d848afd154ac372a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Rot
+    second: {fileID: 2100000, guid: 3fdfe4f3d9dd49c4dbc635526bb83be6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Yellow
+    second: {fileID: 2100000, guid: fde346c8f5606c24a80e54b7380fd9c2, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

@@ -3,7 +3,17 @@ guid: 556bd3b12ec59354e8905d5b018ac0dd
 ModelImporter:
   serializedVersion: 26
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Black
+    second: {fileID: 2100000, guid: 984a42dfffafb8f4d84299b097243326, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: RoadSurface
+    second: {fileID: 2100000, guid: 95caf7e0e81474944aa8d2e7abeaad00, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

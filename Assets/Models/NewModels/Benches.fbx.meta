@@ -3,7 +3,12 @@ guid: 091b4295df0b5244293c63a41e5096f5
 ModelImporter:
   serializedVersion: 26
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Rot
+    second: {fileID: 2100000, guid: f66e80a8949d6d846820f36e15130da9, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

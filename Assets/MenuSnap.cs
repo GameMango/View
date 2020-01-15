@@ -3,10 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 
 public class MenuSnap : MonoBehaviour
 {
-    
+    public string scene;
     public UnityEvent triggered = new UnityEvent();
     public GameObject placeholderStart;
     public Quaternion startRotation;
@@ -23,13 +24,19 @@ public class MenuSnap : MonoBehaviour
         //Check for a match with the specified name on any GameObject that collides with your GameObject
         if (collider.gameObject.name == "LetterT")
         {
+            triggered.Invoke();
             //If the GameObject's name matches the one you suggest, output this message in the console
-            Debug.Log("Start Menu");
             //letter = collider.gameObject;
             collider.transform.position = startTransformation;
             collider.transform.rotation = startRotation;
             collider.attachedRigidbody.useGravity = false;
-            triggered.Invoke();
+            collider.attachedRigidbody.constraints = RigidbodyConstraints.FreezeAll;
+            collider.attachedRigidbody.velocity = Vector3.zero;
         }
+    }
+
+    public void SwitchScene()
+    {
+        SceneManager.LoadScene(scene);
     }
 }

@@ -25,6 +25,7 @@ namespace View.Character
         public float floatMass = 1;
         public float floatForceMultiplier = 40f;
 
+        public bool forceMinDistance = false;
         [MinMaxRange(0f, 100f)] public FloatRange grabDistanceBounds = new FloatRange(0.3f, 10f);
 
 
@@ -48,6 +49,11 @@ namespace View.Character
         public void MoveGrabDistance(float input)
         {
             if (!_floatGrabbing) return;
+            if (forceMinDistance)
+            {
+                _grabDistance = grabDistanceBounds.minimum;
+                return;
+            }
             float currentDistance = Vector3.Distance(follow.transform.position, _grabbedObject.transform.position);
             if (grabWhenClose && currentDistance <= grabDistanceBounds.minimum)
             {
@@ -69,26 +75,44 @@ namespace View.Character
         {
             _grabDistance = Vector3.Distance(follow.position, o.transform.position);
             if (!grabDistanceBounds.Contains(_grabDistance)) return;
+            if(forceMinDistance)
+            {
+                _grabDistance = grabDistanceBounds.minimum;
+            }
+
             _grabbedObject = o;
             _floatGrabbing = true;
-
-            o.Rigidbody.freezeRotation = true;
+            o.Rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
             o.Rigidbody.useGravity = false;
             _origDrag = o.Rigidbody.drag;
             o.Rigidbody.drag = floatDrag;
             _origMass = o.Rigidbody.mass;
             o.Rigidbody.mass = floatMass;
             grabbed.Invoke(_grabbedObject);
+            
         }
 
         public void ReleaseObject()
         {
-            _grabbedObject.Rigidbody.freezeRotation = false;
+            _grabbedObject.Rigidbody.constraints = RigidbodyConstraints.None;
             _grabbedObject.Rigidbody.useGravity = true;
             _grabbedObject.Rigidbody.drag = _origDrag;
             _grabbedObject.Rigidbody.mass = _origMass;
             _floatGrabbing = false;
-            
+
+            released.Invoke(_grabbedObject);
+            _grabbedObject = null;
+        }
+
+        public void Suspend()
+        {
+            _grabbedObject.Rigidbody.velocity = Vector3.zero;
+            _grabbedObject.Rigidbody.constraints = RigidbodyConstraints.FreezeAll;
+            _grabbedObject.Rigidbody.useGravity = false;
+            _grabbedObject.Rigidbody.drag = _origDrag;
+            _grabbedObject.Rigidbody.mass = _origMass;
+            _floatGrabbing = false;
+
             released.Invoke(_grabbedObject);
             _grabbedObject = null;
         }

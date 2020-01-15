@@ -15,7 +15,6 @@ namespace View.ColorShader
         }
 
         public ColorChange[] changes = new ColorChange[6];
-        public int enable = 0;
 
         private void Start()
         {
@@ -27,17 +26,22 @@ namespace View.ColorShader
             for (var i = 0; i < changes.Length; i++)
             {
                 var change = changes[i];
-                change.active = i <= enable - 1;
                 Shader.SetGlobalInt("_REPLACE_COLOR_" + (i + 1), change.active ? 1 : 0);
                 Shader.SetGlobalColor("_TO_REPLACE_COLOR_" + (i + 1), change.replace);
                 Shader.SetGlobalColor("_REPLACE_WITH_COLOR_" + (i + 1), change.with);
             }
         }
 
-        public void CycleEnable()
+        public void Enable(int ind)
         {
-            enable = enable == 3 ? 0 : enable + 1;
-            UpdateShaderGlobals();     
+            changes[ind].active = true;
+            UpdateShaderGlobals();
+        }
+
+        public void Disable(int ind)
+        {
+            changes[ind].active = false;
+            UpdateShaderGlobals();
         }
     }
 }

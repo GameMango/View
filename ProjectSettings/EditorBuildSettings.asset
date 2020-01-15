@@ -6,6 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/StartScreenTest.unity
+    guid: 9dcd678f5f40b43bc981d8ad577bd672
+  - enabled: 1
+    path: Assets/Scenes/City.unity
+    guid: a03dc69d0b6bfca488e34aa141e7c5c1
+  - enabled: 0
     path: Assets/Scenes/VRTK_Test.unity
     guid: f506fff2936e5da4a95d0c08e315d40a
   m_configObjects: {}

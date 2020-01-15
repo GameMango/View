@@ -17,6 +17,8 @@ namespace View.Character
         public bool teleporting = true;
         public TeleporterFacade teleporter;
         public BooleanAction showCurvedAction;
+        public BooleanAction showRightPointer;
+        public BooleanAction showLeftPointer;
         public float speed = 10;
 
         public Transform headTracker;
@@ -25,10 +27,18 @@ namespace View.Character
         private Rigidbody _rigidbody;
 
         public float scaleStartDistance = 2f;
-        public float scaleJumpLerp = 0.8f;
+        public float scaleJump = 0.05f;
+        public float scaleStop = 0.5f;
 
         public FloatGrabHandler leftGrabHandler;
         public FloatGrabHandler rightGrabHandler;
+
+        public Animator leftHandAnimator;
+        public Animator rightHandAnimator;
+        public BooleanAction leftClosedAction;
+        public BooleanAction rightClosedAction;
+        
+        private static readonly int Closed = Animator.StringToHash("closed");
 
         private void Start()
         {
@@ -37,23 +47,35 @@ namespace View.Character
 
         public void Move(Vector3 dir)
         {
-            if (leftGrabHandler.FloatGrabbing) return;
             if (teleporting) return;
+            if (dir.magnitude < 0.001f) return;
             dir.y = 0;
             dir = dir.normalized;
-            _rigidbody.AddForce(dir * speed, ForceMode.VelocityChange);
+            _rigidbody.velocity = dir * speed;
         }
 
         public void ShowCurvedPointer(bool val)
         {
-            if (leftGrabHandler.FloatGrabbing) return;
             if (showCurvedAction == null) return;
             showCurvedAction.Receive(teleporting && val);
         }
 
+        public void ShowRightPointer(bool val)
+        {
+            if (rightGrabHandler.FloatGrabbing || leftGrabHandler.FloatGrabbing ||
+                rightGrabHandler.StandardGrabbing) return;
+            showRightPointer.Receive(val);
+        }
+
+        public void ShowLeftPointer(bool val)
+        {
+            if (rightGrabHandler.FloatGrabbing || leftGrabHandler.FloatGrabbing ||
+                leftGrabHandler.StandardGrabbing) return;
+            showLeftPointer.Receive(val);
+        }
+
         public void Teleport(TransformData dest)
         {
-            if (leftGrabHandler.FloatGrabbing) return;
             if (teleporting)
                 teleporter.Teleport(dest);
         }
@@ -68,7 +90,6 @@ namespace View.Character
             transform.RotateAround(headTracker.position, Vector3.up, rotateDegree);
         }
 
-
         public void ForceGrabSelected(ObjectPointer.EventData data)
         {
             if (rightGrabHandler.StandardGrabbing || leftGrabHandler.FloatGrabbing) return;
@@ -82,13 +103,49 @@ namespace View.Character
                     if (grabbableObject != null && grabbableObject != rightGrabHandler.GrabbedObject)
                     {
                         rightGrabHandler.GrabObject(grabbableObject);
+                        showRightPointer.Receive(false);
+                        showLeftPointer.Receive(false);
                         return;
                     }
                 }
             }
+        }
 
+        public void ReleaseRight()
+        {
             if (rightGrabHandler.FloatGrabbing)
                 rightGrabHandler.ReleaseObject();
+        }
+
+        public void ReleaseLeft()
+        {
+            if (!leftGrabHandler.FloatGrabbing) return;
+
+            GrabbableObject grabbed = leftGrabHandler.GrabbedObject;
+            leftGrabHandler.ReleaseObject();
+
+            var headPos = headTracker.position;
+            var oldPos = grabbed.transform.position;
+            var dir = (oldPos - headPos).normalized;
+            var ray = new Ray(oldPos, dir);
+
+            if (Physics.Raycast(ray, out var hitInfo))
+            {
+                grabbed.transform.position = Vector3.Lerp(oldPos, hitInfo.point, 0.9f);
+                grabbed.transform.localScale *= Vector3.Distance(headPos, grabbed.transform.position)
+                                                / Vector3.Distance(headPos, oldPos);
+            }
+        }
+
+        private void UpdateAnimations()
+        {
+            leftHandAnimator.SetBool(Closed, leftClosedAction.Value);
+            rightHandAnimator.SetBool(Closed, rightClosedAction.Value);
+        }
+        
+        private void Update()
+        {
+            UpdateAnimations();
         }
 
 
@@ -118,6 +175,8 @@ namespace View.Character
                         }
 
                         leftGrabHandler.GrabObject(grabbableObject);
+                        showRightPointer.Receive(false);
+                        showLeftPointer.Receive(false);
                         return;
                     }
                 }
@@ -135,11 +194,31 @@ namespace View.Character
 
                 if (Physics.Raycast(ray, out var hitInfo))
                 {
-                    grabbed.transform.position = Vector3.Lerp(oldPos, hitInfo.point, scaleJumpLerp);
+                    grabbed.transform.position = Vector3.Lerp(oldPos, hitInfo.point, 0.9f);
                     grabbed.transform.localScale *= Vector3.Distance(headPos, grabbed.transform.position)
                                                     / Vector3.Distance(headPos, oldPos);
                 }
             }
+        }
+
+        public void ReleaseGrabbed()
+        {
+            ReleaseLeft();
+            ReleaseRight();
+            leftGrabHandler.interactor.Ungrab();
+            rightGrabHandler.interactor.Ungrab();
+        }
+
+        public void SuspendLeft()
+        {
+            if (!leftGrabHandler.FloatGrabbing) return;
+            leftGrabHandler.Suspend();
+        }
+        
+        public void SuspendRight()
+        {
+            if (!rightGrabHandler.FloatGrabbing) return;
+            rightGrabHandler.Suspend();
         }
 
         public void DisableShadows(GrabbableObject grabbableObject)

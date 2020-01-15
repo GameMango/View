@@ -3,7 +3,17 @@ guid: 78cf1e08bf495d24aa95411ce4d794b5
 ModelImporter:
   serializedVersion: 26
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: BaseGrey
+    second: {fileID: 2100000, guid: f1a1eddb16d144f4f99ac34ef1b8705b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Rot
+    second: {fileID: 2100000, guid: dd0d3c6e10097f04abccd5156b4d2bf7, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

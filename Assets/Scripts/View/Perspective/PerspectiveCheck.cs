@@ -15,11 +15,8 @@ namespace View.Perspective
         }
 
         public Transform cameraTransform;
-        public Transform targetCameraTransform;
         public ColliderRay[] toCheck = new ColliderRay[0];
 
-        public float positionCheckTolerance = 1;
-        public float directionCheckTolerance = 1;
         public UnityEvent checkSucceeded;
 
         private bool _checkSucceeded;
@@ -39,12 +36,6 @@ namespace View.Perspective
             {
                 Debug.DrawLine(camPos, colliderRay.target.position, Color.red, 0.1f);
             }
-
-//            if (Vector3.Distance(cameraTransform.position, targetCameraTransform.position) >
-//                positionCheckTolerance) return;
-//            if (Quaternion.Angle(cameraTransform.rotation, targetCameraTransform.rotation) >
-//                directionCheckTolerance) return;
-
 
             foreach (var colliderRay in toCheck)
             {
