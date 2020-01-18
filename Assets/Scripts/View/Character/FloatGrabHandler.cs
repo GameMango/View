@@ -25,9 +25,7 @@ namespace View.Character
         public float floatMass = 1;
         public float floatForceMultiplier = 40f;
 
-        public bool forceMinDistance = false;
         [MinMaxRange(0f, 100f)] public FloatRange grabDistanceBounds = new FloatRange(0.3f, 10f);
-
 
         public float GrabDistance => _grabDistance;
         public bool FloatGrabbing => _floatGrabbing;
@@ -49,11 +47,6 @@ namespace View.Character
         public void MoveGrabDistance(float input)
         {
             if (!_floatGrabbing) return;
-            if (forceMinDistance)
-            {
-                _grabDistance = grabDistanceBounds.minimum;
-                return;
-            }
             float currentDistance = Vector3.Distance(follow.transform.position, _grabbedObject.transform.position);
             if (grabWhenClose && currentDistance <= grabDistanceBounds.minimum)
             {
@@ -62,6 +55,7 @@ namespace View.Character
                 {
                     switchToInteractor.Invoke(_grabbedObject);
                     ReleaseObject();
+                    interactable.transform.position = follow.position;
                     interactor.Grab(interactable);
                     return;
                 }
@@ -75,10 +69,6 @@ namespace View.Character
         {
             _grabDistance = Vector3.Distance(follow.position, o.transform.position);
             if (!grabDistanceBounds.Contains(_grabDistance)) return;
-            if(forceMinDistance)
-            {
-                _grabDistance = grabDistanceBounds.minimum;
-            }
 
             _grabbedObject = o;
             _floatGrabbing = true;
@@ -89,7 +79,6 @@ namespace View.Character
             _origMass = o.Rigidbody.mass;
             o.Rigidbody.mass = floatMass;
             grabbed.Invoke(_grabbedObject);
-            
         }
 
         public void ReleaseObject()
@@ -119,6 +108,20 @@ namespace View.Character
 
         private void FixedUpdate()
         {
+            if (StandardGrabbing)
+            {
+                foreach (var o in interactor.GrabbedObjects)
+                {
+                    if (o.gameObject.GetInstanceID() != _grabbedObject.gameObject.GetInstanceID())
+                    {
+                        ReleaseObject();
+                        break;
+                    }
+                }
+
+                return;
+            }
+
             if (_floatGrabbing)
             {
                 _grabbedObject.Rigidbody.AddForce(

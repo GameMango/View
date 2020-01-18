@@ -13,6 +13,9 @@ namespace View.Objects
             get; private set;
         }
 
+        public MeshRenderer highlighter;
+        public MeshRenderer highlightClose;
+
         private void Start()
         {
             Rigidbody = GetComponent<Rigidbody>();

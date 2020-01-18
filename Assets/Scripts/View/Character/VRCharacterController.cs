@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering;
 using View.Objects;
@@ -14,70 +16,54 @@ namespace View.Character
 {
     public class VRCharacterController : MonoBehaviour
     {
-        public bool teleporting = true;
-        public TeleporterFacade teleporter;
-        public BooleanAction showCurvedAction;
-        public BooleanAction showRightPointer;
-        public BooleanAction showLeftPointer;
         public float speed = 10;
+        public bool sprinting;
+        public float sprintMultiplier = 1.5f;
 
         public Transform headTracker;
         public float rotateDegree = 45;
 
         private Rigidbody _rigidbody;
-
-        public float scaleStartDistance = 2f;
-        public float scaleJump = 0.05f;
-        public float scaleStop = 0.5f;
-
-        public FloatGrabHandler leftGrabHandler;
+        public InteractorFacade leftInteractor;
         public FloatGrabHandler rightGrabHandler;
+        public BooleanAction rightForceCheckAction;
+        public Transform rightForceCheckCenter;
+        public Transform rightHand;
+        public Vector3 rightForceCheckSize;
 
         public Animator leftHandAnimator;
         public Animator rightHandAnimator;
         public BooleanAction leftClosedAction;
         public BooleanAction rightClosedAction;
-        
+
         private static readonly int Closed = Animator.StringToHash("closed");
+        private int _grabbableLayer;
+
+        private List<GrabbableObject> _objects = new List<GrabbableObject>();
+        private Collider[] _results = new Collider[30];
 
         private void Start()
         {
             _rigidbody = GetComponent<Rigidbody>();
+            _grabbableLayer = LayerMask.GetMask("Grabbable");
         }
 
         public void Move(Vector3 dir)
         {
-            if (teleporting) return;
-            if (dir.magnitude < 0.001f) return;
-            dir.y = 0;
-            dir = dir.normalized;
-            _rigidbody.velocity = dir * speed;
+            _rigidbody.velocity = (sprinting ? sprintMultiplier : 1) * speed * dir;
         }
 
-        public void ShowCurvedPointer(bool val)
+        public void ToggleSprint()
         {
-            if (showCurvedAction == null) return;
-            showCurvedAction.Receive(teleporting && val);
+            sprinting = !sprinting;
         }
 
-        public void ShowRightPointer(bool val)
+        private void FixedUpdate()
         {
-            if (rightGrabHandler.FloatGrabbing || leftGrabHandler.FloatGrabbing ||
-                rightGrabHandler.StandardGrabbing) return;
-            showRightPointer.Receive(val);
-        }
-
-        public void ShowLeftPointer(bool val)
-        {
-            if (rightGrabHandler.FloatGrabbing || leftGrabHandler.FloatGrabbing ||
-                leftGrabHandler.StandardGrabbing) return;
-            showLeftPointer.Receive(val);
-        }
-
-        public void Teleport(TransformData dest)
-        {
-            if (teleporting)
-                teleporter.Teleport(dest);
+            if (_rigidbody.velocity.magnitude <= 0.01f)
+            {
+                sprinting = false;
+            }
         }
 
         public void RotateLeft()
@@ -90,24 +76,79 @@ namespace View.Character
             transform.RotateAround(headTracker.position, Vector3.up, rotateDegree);
         }
 
-        public void ForceGrabSelected(ObjectPointer.EventData data)
+        public GrabbableObject ForceCheck()
         {
-            if (rightGrabHandler.StandardGrabbing || leftGrabHandler.FloatGrabbing) return;
-
-            if (data?.CurrentPointsCastData.HitData != null)
+            ClearHighlight();
+            if (rightGrabHandler.StandardGrabbing) return null;
+            var size = Physics.OverlapSphereNonAlloc(rightForceCheckCenter.transform.position, rightForceCheckSize.x,
+                _results, _grabbableLayer);
+            for (int i = 0; i < size; i++)
             {
-                RaycastHit hit = data.CurrentPointsCastData.HitData.Value;
-                if (hit.rigidbody != null)
+                if (!_results[i].attachedRigidbody) continue;
+                GrabbableObject o = _results[i].attachedRigidbody.GetComponent<GrabbableObject>();
+                if (!o)
+                    continue;
+//                if (!Physics.Raycast(rightForceCheckCenter.transform.position,
+//                     o.transform.position-rightForceCheckCenter.transform.position , out var hit))
+//                    continue;
+//                Debug.DrawRay(rightForceCheckCenter.transform.position,
+//                    o.transform.position-rightForceCheckCenter.transform.position, Color.red, 100);
+//                if (hit.collider.attachedRigidbody.gameObject.GetInstanceID() !=
+//                    o.Rigidbody.gameObject.GetInstanceID())
+//                    continue;
+                _objects.Add(o);
+            }
+
+            if (_objects.Count == 0) return null;
+
+            GrabbableObject nearest = _objects[0];
+            nearest.highlighter.enabled = false;
+            nearest.highlightClose.enabled = true;
+            float distance = Vector3.Distance(rightHand.transform.position, nearest.transform.position);
+            foreach (var grabbableObject in _objects)
+            {
+                grabbableObject.highlighter.enabled = true;
+                if (Vector3.Distance(rightHand.transform.position, grabbableObject.transform.position) <
+                    distance)
                 {
-                    GrabbableObject grabbableObject = hit.rigidbody.GetComponent<GrabbableObject>();
-                    if (grabbableObject != null && grabbableObject != rightGrabHandler.GrabbedObject)
-                    {
-                        rightGrabHandler.GrabObject(grabbableObject);
-                        showRightPointer.Receive(false);
-                        showLeftPointer.Receive(false);
-                        return;
-                    }
+                    nearest.highlightClose.enabled = false;
+                    nearest.highlighter.enabled = true;
+                    nearest = grabbableObject;
+                    distance = Vector3.Distance(rightHand.transform.position, nearest.transform.position);
+                    nearest.highlighter.enabled = false;
+                    nearest.highlightClose.enabled = true;
                 }
+            }
+
+            return nearest;
+        }
+
+        public void ClearHighlight()
+        {
+            foreach (var grabbableObject in _objects)
+            {
+                grabbableObject.highlighter.enabled = false;
+                grabbableObject.highlightClose.enabled = false;
+            }
+
+            _objects.Clear();
+        }
+
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = Color.red;
+            //Use the same vars you use to draw your Overlap SPhere to draw your Wire Sphere.
+            Gizmos.DrawWireSphere (rightForceCheckCenter.position, rightForceCheckSize.x);
+        }
+
+        public void ForceGrab()
+        {
+            if (rightGrabHandler.Grabbing) return;
+            GrabbableObject grabbableObject = ForceCheck();
+            if (grabbableObject != null)
+            {
+                rightGrabHandler.GrabObject(grabbableObject);
+                ClearHighlight();
             }
         }
 
@@ -117,126 +158,32 @@ namespace View.Character
                 rightGrabHandler.ReleaseObject();
         }
 
-        public void ReleaseLeft()
-        {
-            if (!leftGrabHandler.FloatGrabbing) return;
-
-            GrabbableObject grabbed = leftGrabHandler.GrabbedObject;
-            leftGrabHandler.ReleaseObject();
-
-            var headPos = headTracker.position;
-            var oldPos = grabbed.transform.position;
-            var dir = (oldPos - headPos).normalized;
-            var ray = new Ray(oldPos, dir);
-
-            if (Physics.Raycast(ray, out var hitInfo))
-            {
-                grabbed.transform.position = Vector3.Lerp(oldPos, hitInfo.point, 0.9f);
-                grabbed.transform.localScale *= Vector3.Distance(headPos, grabbed.transform.position)
-                                                / Vector3.Distance(headPos, oldPos);
-            }
-        }
-
         private void UpdateAnimations()
         {
             leftHandAnimator.SetBool(Closed, leftClosedAction.Value);
             rightHandAnimator.SetBool(Closed, rightClosedAction.Value);
         }
-        
+
         private void Update()
         {
             UpdateAnimations();
-        }
-
-
-        public void ScaleSelected(ObjectPointer.EventData data)
-        {
-            if (leftGrabHandler.StandardGrabbing || rightGrabHandler.FloatGrabbing) return;
-
-            if (data?.CurrentPointsCastData.HitData != null)
-            {
-                RaycastHit hit = data.CurrentPointsCastData.HitData.Value;
-                if (hit.rigidbody != null)
-                {
-                    GrabbableObject grabbableObject = hit.rigidbody.GetComponent<GrabbableObject>();
-                    if (grabbableObject != null && grabbableObject != leftGrabHandler.GrabbedObject)
-                    {
-                        var grabTransform = grabbableObject.transform;
-
-                        var headPos = headTracker.position;
-                        var oldPos = grabTransform.position;
-                        var dir = (oldPos - headPos).normalized;
-
-                        if (Vector3.Distance(oldPos, headPos) > scaleStartDistance)
-                        {
-                            grabTransform.position = headPos + dir * scaleStartDistance;
-                            grabTransform.localScale *= Vector3.Distance(headPos, grabTransform.position) /
-                                                        Vector3.Distance(headPos, oldPos);
-                        }
-
-                        leftGrabHandler.GrabObject(grabbableObject);
-                        showRightPointer.Receive(false);
-                        showLeftPointer.Receive(false);
-                        return;
-                    }
-                }
-            }
-
-            if (leftGrabHandler.FloatGrabbing)
-            {
-                GrabbableObject grabbed = leftGrabHandler.GrabbedObject;
-                leftGrabHandler.ReleaseObject();
-
-                var headPos = headTracker.position;
-                var oldPos = grabbed.transform.position;
-                var dir = (oldPos - headPos).normalized;
-                var ray = new Ray(oldPos, dir);
-
-                if (Physics.Raycast(ray, out var hitInfo))
-                {
-                    grabbed.transform.position = Vector3.Lerp(oldPos, hitInfo.point, 0.9f);
-                    grabbed.transform.localScale *= Vector3.Distance(headPos, grabbed.transform.position)
-                                                    / Vector3.Distance(headPos, oldPos);
-                }
-            }
+            if (rightForceCheckAction.Value && !rightGrabHandler.Grabbing)
+                ForceCheck();
+            else
+                ClearHighlight();
         }
 
         public void ReleaseGrabbed()
         {
-            ReleaseLeft();
             ReleaseRight();
-            leftGrabHandler.interactor.Ungrab();
+            leftInteractor.Ungrab();
             rightGrabHandler.interactor.Ungrab();
         }
 
-        public void SuspendLeft()
-        {
-            if (!leftGrabHandler.FloatGrabbing) return;
-            leftGrabHandler.Suspend();
-        }
-        
         public void SuspendRight()
         {
             if (!rightGrabHandler.FloatGrabbing) return;
             rightGrabHandler.Suspend();
-        }
-
-        public void DisableShadows(GrabbableObject grabbableObject)
-        {
-            foreach (var rend in grabbableObject.GetComponentsInChildren<Renderer>())
-            {
-                rend.shadowCastingMode = ShadowCastingMode.Off;
-                rend.receiveShadows = false;
-            }
-        }
-
-        public void EnableShadows(GrabbableObject grabbableObject)
-        {
-            foreach (var rend in grabbableObject.GetComponentsInChildren<Renderer>())
-            {
-                rend.shadowCastingMode = ShadowCastingMode.On;
-                rend.receiveShadows = true;
-            }
         }
     }
 }
