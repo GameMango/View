@@ -12,6 +12,7 @@ public class MenuSnap : MonoBehaviour
     public GameObject placeholderStart;
     public Quaternion startRotation;
     public Vector3 startTransformation;
+    public AudioSource audioSource;
     
     private void Start()
     {
@@ -32,6 +33,7 @@ public class MenuSnap : MonoBehaviour
             collider.attachedRigidbody.useGravity = false;
             collider.attachedRigidbody.constraints = RigidbodyConstraints.FreezeAll;
             collider.attachedRigidbody.velocity = Vector3.zero;
+            audioSource.Play();
         }
     }
 

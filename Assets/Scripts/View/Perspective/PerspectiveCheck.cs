@@ -23,6 +23,8 @@ namespace View.Perspective
         private bool _checkSucceeded;
         private int _perspectiveLayerMask;
 
+        public AudioSource check;
+
         private void Start()
         {
             _perspectiveLayerMask = LayerMask.GetMask("Perspective");
@@ -40,6 +42,8 @@ namespace View.Perspective
 
             _checkSucceeded = true;
 
+            check.Play();
+            
             foreach (var colliderRay in toCheck)
             {
                 var ray = new Ray(camPos, colliderRay.target.position - camPos);
