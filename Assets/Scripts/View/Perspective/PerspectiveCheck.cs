@@ -16,6 +16,7 @@ namespace View.Perspective
 
         public Transform cameraTransform;
         public ColliderRay[] toCheck = new ColliderRay[0];
+        public ColliderRay[] toCheckOtherSide = new ColliderRay[0];
 
         public UnityEvent checkSucceeded;
 
@@ -37,15 +38,43 @@ namespace View.Perspective
                 Debug.DrawLine(camPos, colliderRay.target.position, Color.red, 0.1f);
             }
 
+            _checkSucceeded = true;
+
             foreach (var colliderRay in toCheck)
             {
                 var ray = new Ray(camPos, colliderRay.target.position - camPos);
-                if (!Physics.Raycast(ray, out var hit, _perspectiveLayerMask)) return;
-                if (hit.collider.GetInstanceID() != colliderRay.toHit.GetInstanceID()) return;
+                if (!Physics.Raycast(ray, out var hit, _perspectiveLayerMask))
+                {
+                    _checkSucceeded = false;
+                    break;
+                }
+
+                if (hit.collider.GetInstanceID() != colliderRay.toHit.GetInstanceID())
+                {
+                    _checkSucceeded = false;
+                    break;
+                }
             }
 
-            _checkSucceeded = true;
-            checkSucceeded.Invoke();
+            if (!_checkSucceeded)
+                foreach (var colliderRay in toCheckOtherSide)
+                {
+                    var ray = new Ray(camPos, colliderRay.target.position - camPos);
+                    if (!Physics.Raycast(ray, out var hit, _perspectiveLayerMask))
+                    {
+                        _checkSucceeded = false;
+                        break;
+                    }
+
+                    if (hit.collider.GetInstanceID() != colliderRay.toHit.GetInstanceID())
+                    {
+                        _checkSucceeded = false;
+                        break;
+                    }
+                }
+
+            if (_checkSucceeded)
+                checkSucceeded.Invoke();
         }
     }
 }
